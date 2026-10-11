@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "buildCommand": "node dashboard/build.mjs",
-  "outputDirectory": "dashboard/dist",
+  "buildCommand": "node build.mjs",
+  "outputDirectory": "dist",
   "cleanUrls": true
 }

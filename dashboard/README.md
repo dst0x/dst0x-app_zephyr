@@ -32,7 +32,7 @@ Buka `http://localhost:8080`. Dashboard otomatis menghubungi broker dan subscrib
 
 ## Deployment Vercel
 
-Jika repository firmware digunakan sebagai Root Directory, konfigurasi pada `/vercel.json` akan menjalankan build dan mempublikasikan `dashboard/dist`.
+Atur **Root Directory** project Vercel menjadi `dashboard`. Konfigurasi `dashboard/vercel.json` akan menjalankan `node build.mjs` dan mempublikasikan folder `dist`.
 
 Tambahkan Environment Variables berikut di **Vercel → Project Settings → Environment Variables**:
 
