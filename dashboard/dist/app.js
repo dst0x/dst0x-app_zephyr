@@ -1,5 +1,6 @@
 const $ = (id) => document.getElementById(id);
 const environment = window.__DST0_CONFIG__ || {};
+const DEVICE_TIME_ZONE = environment.timezone || 'Asia/Jakarta';
 
 const state = {
   socket: null,
@@ -229,23 +230,26 @@ function displayData(data, saveToHistory) {
 
   updateSignal(signal);
   updateNotes(temp, humidity, wind);
-  const date = Number.isFinite(Number(data.timestamp)) ? new Date(Number(data.timestamp) * 1000) : new Date();
-  $('lastUpdate').textContent = `Diperbarui ${date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long' })}, ${date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} WIB`;
+  const date = deviceDate(data);
+  $('lastUpdate').textContent = date
+    ? `Diperbarui ${formatDeviceTimestamp(date, true)}`
+    : 'Timestamp perangkat tidak tersedia';
 
-  if (saveToHistory) saveReading(data, date);
+  if (saveToHistory) saveReading(data);
 }
 
 function historyStorageKey() {
   return `dst0WeatherHistory:v1:${state.config.topic}`;
 }
 
-function saveReading(data, date) {
-  const reading = { ...data, _receivedAt: date.getTime() };
-  const last = state.history.at(-1);
-  const isDuplicate = last && last.id === reading.id && Number(last.timestamp) === Number(reading.timestamp);
-  if (isDuplicate) state.history[state.history.length - 1] = reading;
+function saveReading(data) {
+  const reading = { ...data, _receivedAt: Date.now() };
+  const duplicateIndex = state.history.findIndex((item) =>
+    item.id === reading.id && Number(item.timestamp) === Number(reading.timestamp)
+  );
+  if (duplicateIndex >= 0) state.history[duplicateIndex] = reading;
   else state.history.push(reading);
-  state.history = state.history.slice(-200);
+  state.history = sortHistory(state.history).slice(-200);
 
   try {
     localStorage.setItem(historyStorageKey(), JSON.stringify(state.history));
@@ -258,7 +262,7 @@ function saveReading(data, date) {
 function restoreHistory() {
   try {
     const stored = JSON.parse(localStorage.getItem(historyStorageKey()) || '[]');
-    state.history = Array.isArray(stored) ? stored.slice(-200) : [];
+    state.history = Array.isArray(stored) ? sortHistory(stored).slice(-200) : [];
   } catch {
     state.history = [];
   }
@@ -267,12 +271,20 @@ function restoreHistory() {
   refreshHistoryViews();
 }
 
+function sortHistory(history) {
+  return [...history].sort((a, b) => {
+    const aTime = Number.isFinite(Number(a.timestamp)) ? Number(a.timestamp) * 1000 : Number(a._receivedAt) || 0;
+    const bTime = Number.isFinite(Number(b.timestamp)) ? Number(b.timestamp) * 1000 : Number(b._receivedAt) || 0;
+    return aTime - bTime;
+  });
+}
+
 function refreshHistoryViews() {
   const chartData = state.history
-    .filter((item) => Number.isFinite(Number(item['DST0-tem'])))
+    .filter((item) => Number.isFinite(Number(item['DST0-tem'])) && deviceDate(item))
     .slice(-12);
   state.temperatures = chartData.map((item) => Number(item['DST0-tem']));
-  state.labels = chartData.map((item) => readingDate(item).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }));
+  state.labels = chartData.map((item) => formatDeviceTime(deviceDate(item)));
   state.messages = state.history.length;
   $('messageCount').textContent = `${state.history.length} data tersimpan`;
   $('historyCount').textContent = `${state.history.length} DATA`;
@@ -280,11 +292,34 @@ function refreshHistoryViews() {
   drawChart();
 }
 
-function readingDate(item) {
+function deviceDate(item) {
   const timestamp = Number(item.timestamp);
-  const millis = Number.isFinite(timestamp) ? timestamp * 1000 : Number(item._receivedAt);
-  const date = new Date(millis);
-  return Number.isNaN(date.getTime()) ? new Date() : date;
+  if (!Number.isFinite(timestamp)) return null;
+  const date = new Date(timestamp * 1000);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatDeviceTime(date) {
+  return date.toLocaleTimeString('id-ID', {
+    timeZone: DEVICE_TIME_ZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23'
+  });
+}
+
+function formatDeviceTimestamp(date, includeSeconds) {
+  return date.toLocaleString('id-ID', {
+    timeZone: DEVICE_TIME_ZONE,
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: includeSeconds ? '2-digit' : undefined,
+    hourCycle: 'h23',
+    timeZoneName: 'short'
+  });
 }
 
 function renderHistoryTable() {
@@ -304,9 +339,9 @@ function renderHistoryTable() {
 
   readings.forEach((item) => {
     const row = document.createElement('tr');
-    const date = readingDate(item);
+    const date = deviceDate(item);
     const values = [
-      date.toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }),
+      date ? formatDeviceTimestamp(date, false) : '—',
       formatHistoryValue(item['DST0-tem'], 1, ' °C'),
       formatHistoryValue(item['DST0-hum'], 1, ' %'),
       formatHistoryValue(item['DST0-pre'], 1, ' hPa'),

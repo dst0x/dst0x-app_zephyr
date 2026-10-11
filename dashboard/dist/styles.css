@@ -30,7 +30,8 @@ body {
 
 .topbar { display: flex; align-items: center; justify-content: space-between; }
 .brand { display: flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; }
-.brand-mark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 13px; color: white; background: var(--ink); font: 500 13px "DM Mono"; letter-spacing: -.05em; }
+.brand-mark { display: block; width: 46px; height: 46px; overflow: hidden; border-radius: 13px; background: rgba(255,255,255,.82); box-shadow: 0 6px 18px rgba(30,66,106,.10); }
+.brand-mark img { display: block; width: 68px; height: 68px; max-width: none; margin: -2px 0 0 -11px; object-fit: contain; }
 .brand strong, .brand small { display: block; }
 .brand strong { font-size: 14px; letter-spacing: .11em; }
 .brand small { margin-top: 1px; color: var(--muted); font-size: 11px; }

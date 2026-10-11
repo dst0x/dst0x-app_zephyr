@@ -11,6 +11,7 @@ MQTT_URL=wss://broker.avisha.id:8084/mqtt
 MQTT_TOPIC=dstxlabs/signal
 MQTT_USERNAME=dstxlabs_viewer
 MQTT_PASSWORD=password-subscriber
+DASHBOARD_TIMEZONE=Asia/Jakarta
 ```
 
 Hasil konfigurasi dibuat dengan:
@@ -43,6 +44,7 @@ MQTT_URL
 MQTT_TOPIC
 MQTT_USERNAME
 MQTT_PASSWORD
+DASHBOARD_TIMEZONE
 ```
 
 Setelah variabel ditambahkan, lakukan redeploy. File `.env` lokal tidak perlu dan tidak boleh diunggah.

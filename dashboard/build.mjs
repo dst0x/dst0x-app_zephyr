@@ -33,7 +33,7 @@ try {
 const env = {
   ...fileEnv,
   ...Object.fromEntries(
-    ['MQTT_URL', 'MQTT_TOPIC', 'MQTT_USERNAME', 'MQTT_PASSWORD']
+    ['MQTT_URL', 'MQTT_TOPIC', 'MQTT_USERNAME', 'MQTT_PASSWORD', 'DASHBOARD_TIMEZONE']
       .filter((key) => process.env[key] !== undefined)
       .map((key) => [key, process.env[key]])
   )
@@ -42,7 +42,8 @@ const config = {
   url: env.MQTT_URL || '',
   topic: env.MQTT_TOPIC || '',
   username: env.MQTT_USERNAME || '',
-  password: env.MQTT_PASSWORD || ''
+  password: env.MQTT_PASSWORD || '',
+  timezone: env.DASHBOARD_TIMEZONE || 'Asia/Jakarta'
 };
 
 await writeFile(outputPath, `window.__DST0_CONFIG__ = ${JSON.stringify(config)};\n`, 'utf8');
