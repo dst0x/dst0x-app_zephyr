@@ -4,5 +4,6 @@
 #define RSC_STORAGE_H
 
 int storage_init(void);
+const char *storage_mount_point(void);
 
 #endif

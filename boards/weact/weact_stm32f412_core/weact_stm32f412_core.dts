@@ -58,6 +58,32 @@
 	status = "okay";
 };
 
+&dma2 {
+	status = "okay";
+};
+
+&usart6 {
+	pinctrl-0 = <&usart6_tx_pc6 &usart6_rx_pc7>;
+	pinctrl-names = "default";
+	current-speed = <115200>;
+	dmas = <&dma2 6 5 STM32_DMA_PERIPH_TX 0>,
+	       <&dma2 1 5 STM32_DMA_PERIPH_RX 0>;
+	dma-names = "tx", "rx";
+	status = "okay";
+};
+
+&usart1 {
+	pinctrl-0 = <&usart1_tx_pa9 &usart1_rx_pa10>;
+	pinctrl-names = "default";
+	current-speed = <9600>;
+	status = "okay";
+
+	modbus0: modbus0 {
+		compatible = "zephyr,modbus-serial";
+		status = "okay";
+	};
+};
+
 &sdmmc1 {
 	pinctrl-0 = <&sdio_d0_pc8 &sdio_d1_pc9 &sdio_d2_pc10 &sdio_d3_pc11
 		     &sdio_ck_pc12 &sdio_cmd_pd2>;

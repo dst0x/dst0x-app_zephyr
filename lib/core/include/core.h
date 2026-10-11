@@ -21,5 +21,7 @@ struct config {
 const struct config *config_get(void);
 int config_load(void);
 void config_print(void);
+uint32_t datetime_to_epoch(uint16_t year, uint8_t month, uint8_t day,
+			   uint8_t hour, uint8_t minute, uint8_t second);
 
 #endif
