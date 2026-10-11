@@ -403,8 +403,8 @@ function drawChart() {
   if (max === min) max += 1;
 
   ctx.font = '9px DM Mono';
-  ctx.fillStyle = '#98a09b';
-  ctx.strokeStyle = 'rgba(28,45,37,.08)';
+  ctx.fillStyle = '#91a0b4';
+  ctx.strokeStyle = 'rgba(18,72,132,.08)';
   ctx.lineWidth = 1;
   for (let i = 0; i < 4; i++) {
     const y = pad.top + ((h - pad.top - pad.bottom) / 3) * i;
@@ -416,14 +416,14 @@ function drawChart() {
   const x = (i) => pad.left + (values.length === 1 ? 0 : i * (w - pad.left - pad.right) / (values.length - 1));
   const y = (value) => pad.top + (max - value) * (h - pad.top - pad.bottom) / (max - min);
   const gradient = ctx.createLinearGradient(0, pad.top, 0, h - pad.bottom);
-  gradient.addColorStop(0, 'rgba(227,135,87,.20)'); gradient.addColorStop(1, 'rgba(227,135,87,0)');
+  gradient.addColorStop(0, 'rgba(7,151,237,.22)'); gradient.addColorStop(1, 'rgba(7,151,237,0)');
   ctx.beginPath(); values.forEach((value, i) => i ? ctx.lineTo(x(i), y(value)) : ctx.moveTo(x(i), y(value)));
   ctx.lineTo(x(values.length - 1), h - pad.bottom); ctx.lineTo(x(0), h - pad.bottom); ctx.closePath(); ctx.fillStyle = gradient; ctx.fill();
   ctx.beginPath(); values.forEach((value, i) => i ? ctx.lineTo(x(i), y(value)) : ctx.moveTo(x(i), y(value)));
-  ctx.strokeStyle = '#e38757'; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke();
-  values.forEach((value, i) => { ctx.beginPath(); ctx.arc(x(i), y(value), 3, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill(); ctx.strokeStyle = '#e38757'; ctx.stroke(); });
+  ctx.strokeStyle = '#078fe8'; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke();
+  values.forEach((value, i) => { ctx.beginPath(); ctx.arc(x(i), y(value), 3, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill(); ctx.strokeStyle = '#078fe8'; ctx.stroke(); });
   if (labels.length) {
-    ctx.fillStyle = '#98a09b';
+    ctx.fillStyle = '#91a0b4';
     [0, Math.floor((labels.length - 1) / 2), labels.length - 1].forEach((i) => { if (labels[i]) ctx.fillText(labels[i], Math.max(pad.left, Math.min(x(i) - 14, w - 38)), h - 7); });
   }
   $('chartRange').textContent = `${min}–${max} °C`;
