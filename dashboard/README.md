@@ -30,6 +30,21 @@ python3 -m http.server 8080
 
 Buka `http://localhost:8080`. Dashboard otomatis menghubungi broker dan subscribe ke topic dari `.env`. Pengaturan koneksi tidak ditampilkan di dashboard.
 
+## Deployment Vercel
+
+Jika repository firmware digunakan sebagai Root Directory, konfigurasi pada `/vercel.json` akan menjalankan build dan mempublikasikan `dashboard/dist`.
+
+Tambahkan Environment Variables berikut di **Vercel → Project Settings → Environment Variables**:
+
+```text
+MQTT_URL
+MQTT_TOPIC
+MQTT_USERNAME
+MQTT_PASSWORD
+```
+
+Setelah variabel ditambahkan, lakukan redeploy. File `.env` lokal tidak perlu dan tidak boleh diunggah.
+
 > Browser tidak dapat terhubung langsung ke MQTT TCP port `1883`. Broker harus menyediakan listener WebSocket, biasanya `ws://host:8083/mqtt` atau `wss://host:8084/mqtt`.
 
 ## Payload

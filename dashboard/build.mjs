@@ -22,7 +22,22 @@ function parseEnv(source) {
   return values;
 }
 
-const env = parseEnv(await readFile(envPath, 'utf8'));
+let fileEnv = {};
+
+try {
+  fileEnv = parseEnv(await readFile(envPath, 'utf8'));
+} catch (error) {
+  if (error.code !== 'ENOENT') throw error;
+}
+
+const env = {
+  ...fileEnv,
+  ...Object.fromEntries(
+    ['MQTT_URL', 'MQTT_TOPIC', 'MQTT_USERNAME', 'MQTT_PASSWORD']
+      .filter((key) => process.env[key] !== undefined)
+      .map((key) => [key, process.env[key]])
+  )
+};
 const config = {
   url: env.MQTT_URL || '',
   topic: env.MQTT_TOPIC || '',
