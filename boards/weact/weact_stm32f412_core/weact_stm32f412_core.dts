@@ -1,0 +1,67 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+
+/dts-v1/;
+#include <st/f4/stm32f412Xe.dtsi>
+#include <st/f4/stm32f412r(e-g)tx-pinctrl.dtsi>
+
+/ {
+	model = "WeAct Studio STM32F412 Core Board";
+	compatible = "weact,stm32f412-core", "st,stm32f412";
+
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+		zephyr,console = &usart2;
+		zephyr,shell-uart = &usart2;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		user_led: led {
+			gpios = <&gpiob 2 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
+	aliases {
+		led0 = &user_led;
+	};
+};
+
+&clk_hse {
+	clock-frequency = <DT_FREQ_M(8)>;
+	status = "okay";
+};
+
+&pll {
+	div-m = <8>;
+	mul-n = <192>;
+	div-p = <2>;
+	div-q = <4>;
+	clocks = <&clk_hse>;
+	status = "okay";
+};
+
+&rcc {
+	clocks = <&pll>;
+	clock-frequency = <DT_FREQ_M(96)>;
+	ahb-prescaler = <1>;
+	apb1-prescaler = <2>;
+	apb2-prescaler = <1>;
+};
+
+&usart2 {
+	pinctrl-0 = <&usart2_tx_pa2 &usart2_rx_pa3>;
+	pinctrl-names = "default";
+	current-speed = <115200>;
+	status = "okay";
+};
+
+&sdmmc1 {
+	pinctrl-0 = <&sdio_d0_pc8 &sdio_d1_pc9 &sdio_d2_pc10 &sdio_d3_pc11
+		     &sdio_ck_pc12 &sdio_cmd_pd2>;
+	pinctrl-names = "default";
+	cd-gpios = <&gpioa 15 GPIO_ACTIVE_LOW>;
+	bus-width = <4>;
+	status = "okay";
+};

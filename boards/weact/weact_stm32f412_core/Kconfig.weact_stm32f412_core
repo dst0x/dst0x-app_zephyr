@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
+
+config BOARD_WEACT_STM32F412_CORE
+	select SOC_STM32F412RX

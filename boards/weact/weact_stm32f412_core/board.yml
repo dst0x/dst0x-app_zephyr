@@ -1,0 +1,6 @@
+board:
+  name: weact_stm32f412_core
+  full_name: STM32F412 Core Board V1.1
+  vendor: weact
+  socs:
+    - name: stm32f412rx
