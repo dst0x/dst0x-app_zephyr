@@ -30,6 +30,8 @@ python3 -m http.server 8080
 
 Buka `http://localhost:8080`. Dashboard otomatis menghubungi broker dan subscribe ke topic dari `.env`. Pengaturan koneksi tidak ditampilkan di dashboard.
 
+Dashboard menyimpan maksimal 200 pembacaan terakhir di `localStorage` browser. Data terakhir langsung ditampilkan ketika halaman dimuat, dan 20 pembacaan terbaru tersedia pada tabel riwayat. Penyimpanan ini bersifat lokal per browser; untuk riwayat lintas perangkat diperlukan backend/database.
+
 ## Deployment Vercel
 
 Atur **Root Directory** project Vercel menjadi `dashboard`. Konfigurasi `dashboard/vercel.json` akan menjalankan `node build.mjs` dan mempublikasikan folder `dist`.

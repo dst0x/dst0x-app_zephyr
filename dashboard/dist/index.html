@@ -85,10 +85,35 @@
       </article>
     </section>
 
+    <section class="panel history-panel">
+      <div class="panel-title">
+        <div><span>Riwayat pembacaan</span><small>Data terbaru tersimpan di browser ini</small></div>
+        <strong id="historyCount">0 DATA</strong>
+      </div>
+      <div class="history-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>Suhu</th>
+              <th>Kelembapan</th>
+              <th>Tekanan</th>
+              <th>Angin</th>
+              <th>Arah</th>
+              <th>Sinyal</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody">
+            <tr class="empty-row"><td colspan="7">Belum ada data tersimpan</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
     <footer>
       <span>Firmware <b id="firmwareVersion">—</b></span>
       <span>Topik <b id="activeTopic">dstxlabs/signal</b></span>
-      <span id="messageCount">0 pesan diterima</span>
+      <span id="messageCount">0 data tersimpan</span>
     </footer>
   </main>
 

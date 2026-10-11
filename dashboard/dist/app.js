@@ -12,6 +12,7 @@ const state = {
   messages: 0,
   temperatures: [],
   labels: [],
+  history: [],
   config: {
     url: environment.url || 'wss://broker.avisha.id:8084/mqtt',
     topic: environment.topic || 'dstxlabs/signal',
@@ -200,6 +201,11 @@ function processPayload(raw) {
   try { data = JSON.parse(raw); }
   catch { return; }
 
+  displayData(data, true);
+}
+
+function displayData(data, saveToHistory) {
+
   const temp = numberValue(data['DST0-tem']);
   const humidity = numberValue(data['DST0-hum']);
   const pressure = numberValue(data['DST0-pre']);
@@ -223,17 +229,103 @@ function processPayload(raw) {
 
   updateSignal(signal);
   updateNotes(temp, humidity, wind);
-  state.messages += 1;
-  $('messageCount').textContent = `${state.messages} pesan diterima`;
   const date = Number.isFinite(Number(data.timestamp)) ? new Date(Number(data.timestamp) * 1000) : new Date();
   $('lastUpdate').textContent = `Diperbarui ${date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long' })}, ${date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} WIB`;
 
-  if (Number.isFinite(temp)) {
-    state.temperatures.push(temp);
-    state.labels.push(date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }));
-    if (state.temperatures.length > 12) { state.temperatures.shift(); state.labels.shift(); }
-    drawChart();
+  if (saveToHistory) saveReading(data, date);
+}
+
+function historyStorageKey() {
+  return `dst0WeatherHistory:v1:${state.config.topic}`;
+}
+
+function saveReading(data, date) {
+  const reading = { ...data, _receivedAt: date.getTime() };
+  const last = state.history.at(-1);
+  const isDuplicate = last && last.id === reading.id && Number(last.timestamp) === Number(reading.timestamp);
+  if (isDuplicate) state.history[state.history.length - 1] = reading;
+  else state.history.push(reading);
+  state.history = state.history.slice(-200);
+
+  try {
+    localStorage.setItem(historyStorageKey(), JSON.stringify(state.history));
+  } catch (error) {
+    console.warn('[DASHBOARD] Riwayat tidak dapat disimpan:', error);
   }
+  refreshHistoryViews();
+}
+
+function restoreHistory() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(historyStorageKey()) || '[]');
+    state.history = Array.isArray(stored) ? stored.slice(-200) : [];
+  } catch {
+    state.history = [];
+  }
+
+  if (state.history.length) displayData(state.history.at(-1), false);
+  refreshHistoryViews();
+}
+
+function refreshHistoryViews() {
+  const chartData = state.history
+    .filter((item) => Number.isFinite(Number(item['DST0-tem'])))
+    .slice(-12);
+  state.temperatures = chartData.map((item) => Number(item['DST0-tem']));
+  state.labels = chartData.map((item) => readingDate(item).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }));
+  state.messages = state.history.length;
+  $('messageCount').textContent = `${state.history.length} data tersimpan`;
+  $('historyCount').textContent = `${state.history.length} DATA`;
+  renderHistoryTable();
+  drawChart();
+}
+
+function readingDate(item) {
+  const timestamp = Number(item.timestamp);
+  const millis = Number.isFinite(timestamp) ? timestamp * 1000 : Number(item._receivedAt);
+  const date = new Date(millis);
+  return Number.isNaN(date.getTime()) ? new Date() : date;
+}
+
+function renderHistoryTable() {
+  const body = $('historyBody');
+  body.replaceChildren();
+  const readings = state.history.slice(-20).reverse();
+  if (!readings.length) {
+    const row = document.createElement('tr');
+    row.className = 'empty-row';
+    const cell = document.createElement('td');
+    cell.colSpan = 7;
+    cell.textContent = 'Belum ada data tersimpan';
+    row.appendChild(cell);
+    body.appendChild(row);
+    return;
+  }
+
+  readings.forEach((item) => {
+    const row = document.createElement('tr');
+    const date = readingDate(item);
+    const values = [
+      date.toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }),
+      formatHistoryValue(item['DST0-tem'], 1, ' °C'),
+      formatHistoryValue(item['DST0-hum'], 1, ' %'),
+      formatHistoryValue(item['DST0-pre'], 1, ' hPa'),
+      formatHistoryValue(item['DST0-wsp'], 2, ' m/s'),
+      formatHistoryValue(item['DST0-dir'], 0, '°'),
+      formatHistoryValue(item['DST0-sig'], 0, '%')
+    ];
+    values.forEach((value) => {
+      const cell = document.createElement('td');
+      cell.textContent = value;
+      row.appendChild(cell);
+    });
+    body.appendChild(row);
+  });
+}
+
+function formatHistoryValue(value, decimals, unit) {
+  const number = Number(value);
+  return Number.isFinite(number) ? `${number.toFixed(decimals)}${unit}` : '—';
 }
 
 function numberValue(value) {
@@ -304,5 +396,5 @@ function drawChart() {
 
 $('activeTopic').textContent = state.config.topic;
 window.addEventListener('resize', drawChart);
-drawChart();
+restoreHistory();
 connect();
