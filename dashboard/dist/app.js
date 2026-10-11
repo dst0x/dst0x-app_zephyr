@@ -239,7 +239,8 @@ function displayData(data, saveToHistory) {
 }
 
 function historyStorageKey() {
-  return `dst0WeatherHistory:v1:${state.config.topic}`;
+  /* v2 excludes cached records created before firmware timestamps were UTC. */
+  return `dst0WeatherHistory:v2:${state.config.topic}`;
 }
 
 function saveReading(data) {

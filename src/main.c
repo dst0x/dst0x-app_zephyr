@@ -75,8 +75,20 @@ static int sync_network_time(const struct config *cfg)
 		k_sleep(K_SECONDS(2));
 		if (esp32_ntp_get_time(&year, &month, &day, &hour, &minute,
 				       &second) == ESP32_OK) {
-			s_epoch_base = datetime_to_epoch(year, month, day, hour,
-						    minute, second);
+			/* ESP32 returns local time according to CIPSNTPCFG timezone.
+			 * Convert it back to UTC before publishing a Unix timestamp.
+			 */
+			int64_t local_epoch = datetime_to_epoch(year, month, day, hour,
+							 minute, second);
+			int64_t utc_epoch = local_epoch -
+					    ((int64_t)cfg->ntp_timezone * 3600LL);
+
+			if (utc_epoch <= 0 || utc_epoch > UINT32_MAX) {
+				printk("[WARN] Invalid NTP epoch\r");
+				return -1;
+			}
+
+			s_epoch_base = (uint32_t)utc_epoch;
 			s_epoch_tick = k_uptime_get();
 			printk("[NTP] %04u-%02u-%02u %02u:%02u:%02u\r",
 			       year, month, day, hour, minute, second);
