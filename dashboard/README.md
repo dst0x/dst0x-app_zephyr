@@ -31,7 +31,7 @@ python3 -m http.server 8080
 
 Buka `http://localhost:8080`. Dashboard otomatis menghubungi broker dan subscribe ke topic dari `.env`. Pengaturan koneksi tidak ditampilkan di dashboard.
 
-Dashboard menyimpan maksimal 200 pembacaan terakhir di `localStorage` browser. Data terakhir langsung ditampilkan ketika halaman dimuat, dan 20 pembacaan terbaru tersedia pada tabel riwayat. Penyimpanan ini bersifat lokal per browser; untuk riwayat lintas perangkat diperlukan backend/database.
+Dashboard menyimpan maksimal 10.000 pembacaan terakhir di `localStorage` browser. Data terakhir langsung ditampilkan ketika halaman dimuat. Halaman analitik menyediakan tampilan realtime atau agregasi rata-rata per menit, jam, hari, dan minggu, filter rentang tanggal, pilihan parameter, serta ekspor Excel. Penyimpanan ini bersifat lokal per browser; untuk riwayat lintas perangkat diperlukan backend/database.
 
 ## Deployment Vercel
 
@@ -68,3 +68,31 @@ Setelah variabel ditambahkan, lakukan redeploy. File `.env` lokal tidak perlu da
 ```
 
 Untuk mengubah koneksi, edit `.env` dan jalankan kembali `node build.mjs`.
+
+## Publisher data dummy
+
+Pasang dependensi publisher:
+
+```bash
+python3 -m pip install -r dashboard/scripts/requirements.txt
+```
+
+Pastikan akun pada `.env` memiliki izin publish. Jika akun dashboard hanya read-only, isi
+`MQTT_PUBLISH_USERNAME` dan `MQTT_PUBLISH_PASSWORD`. Kemudian jalankan dari root repository:
+
+```bash
+python3 dashboard/scripts/publish_dummy.py
+```
+
+Script mengirim data baru setiap 2 detik sampai dihentikan dengan `Ctrl+C`. Interval, jumlah
+data, dan ID perangkat dapat diubah:
+
+```bash
+python3 dashboard/scripts/publish_dummy.py --interval 1 --count 100 --device-id DST0X-TEST
+```
+
+Untuk memeriksa payload tanpa menghubungi broker:
+
+```bash
+python3 dashboard/scripts/publish_dummy.py --dry-run --count 5 --seed 42
+```

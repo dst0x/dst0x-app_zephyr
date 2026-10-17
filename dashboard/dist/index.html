@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#f3f7fc" />
+  <meta name="theme-color" content="#F8F9FA" />
   <meta name="description" content="Dashboard pemantauan sensor cuaca DST0 melalui MQTT." />
   <title>DST0 Weather Monitor</title>
   <link rel="icon" type="image/png" href="assets/dstx-icon.png" />
   <link rel="apple-touch-icon" href="assets/dstx-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -23,6 +23,10 @@
         <span class="brand-mark"><img src="assets/dstx-icon.png" alt="" /></span>
         <span><strong>DST0</strong><small>Weather Monitor</small></span>
       </a>
+      <nav class="page-nav" aria-label="Navigasi dashboard">
+        <button class="nav-button active" type="button" data-page="overviewPage">Overview</button>
+        <button class="nav-button" type="button" data-page="analyticsPage">Grafik &amp; Data</button>
+      </nav>
       <div class="header-actions">
         <div id="connectionBadge" class="status-pill offline">
           <span class="status-dot"></span>
@@ -31,86 +35,133 @@
       </div>
     </header>
 
-    <section class="hero">
-      <div>
-        <p class="eyebrow">LIVE ENVIRONMENT</p>
-        <h1>Kondisi cuaca,<br><span>sekilas terbaca.</span></h1>
-        <p id="lastUpdate" class="last-update">Menunggu data pertama dari sensor…</p>
-      </div>
-      <div class="device-card">
-        <div class="device-icon">
-          <svg viewBox="0 0 24 24"><path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M9 7h6M9 11h6M9 15h3"/></svg>
+    <div id="overviewPage" class="app-page active">
+    <section class="station-showcase" aria-labelledby="stationTitle">
+      <div class="station-heading">
+        <div>
+          <p class="eyebrow">SENSOR OVERVIEW</p>
+          <h2 id="stationTitle">Satu alat, dua sensor.</h2>
         </div>
-        <div><span>Perangkat aktif</span><strong id="deviceId">DST0X-001</strong></div>
-        <div class="signal" title="Kekuatan sinyal"><i></i><i></i><i></i><i></i><span id="signalHeader">—</span></div>
+        <p>Nilai pada gelembung diperbarui langsung dari data MQTT perangkat.</p>
       </div>
-    </section>
 
-    <section class="metrics-grid" aria-label="Data sensor terkini">
-      <article class="metric-card temperature">
-        <div class="metric-head"><span>Suhu udara</span><span class="metric-icon">°</span></div>
-        <div class="metric-value"><strong id="temperature">—</strong><span>°C</span></div>
-        <p id="temperatureNote">Belum ada data</p>
-      </article>
-      <article class="metric-card humidity">
-        <div class="metric-head"><span>Kelembapan</span><span class="drop-icon">◒</span></div>
-        <div class="metric-value"><strong id="humidity">—</strong><span>%RH</span></div>
-        <p id="humidityNote">Belum ada data</p>
-      </article>
-      <article class="metric-card pressure">
-        <div class="metric-head"><span>Tekanan udara</span><span class="pressure-icon">↕</span></div>
-        <div class="metric-value"><strong id="pressure">—</strong><span>hPa</span></div>
-        <p>Tekanan atmosfer lokal</p>
-      </article>
-      <article class="metric-card wind">
-        <div class="metric-head"><span>Kecepatan angin</span><span class="wind-icon">≈</span></div>
-        <div class="metric-value"><strong id="windSpeed">—</strong><span>m/s</span></div>
-        <p id="windNote">Belum ada data</p>
-      </article>
-    </section>
-
-    <section class="detail-grid">
-      <article class="panel direction-panel">
-        <div class="panel-title"><div><span>Arah angin</span><small>Rata-rata pembacaan</small></div><strong id="directionLabel">—</strong></div>
-        <div class="compass">
-          <span class="north">U</span><span class="east">T</span><span class="south">S</span><span class="west">B</span>
-          <div class="compass-rings"></div>
-          <div id="compassNeedle" class="needle"><span></span></div>
-          <div class="compass-center"><strong id="windDirection">—</strong><small>derajat</small></div>
+      <div class="station-visual">
+        <img src="assets/weather-station.png" alt="Perangkat stasiun cuaca DST0 dengan sensor rainfall di kiri dan weather 5 in 1 di kanan" />
+        <div id="stationWeatherEffects" class="station-weather-effects" aria-hidden="true">
+          <div class="wind-effect">
+            <svg class="wind-gust wind-gust-top" viewBox="0 0 420 150" role="presentation">
+              <path d="M12 72 C96 24 170 36 242 62 C304 84 350 81 378 56 C397 39 397 14 378 11 C358 8 346 24 351 39 C355 51 371 52 376 42" />
+              <path d="M22 103 C106 55 186 60 253 86 C313 109 357 105 387 79" />
+            </svg>
+            <svg class="wind-gust wind-gust-bottom" viewBox="0 0 420 150" role="presentation">
+              <path d="M8 84 C91 37 169 43 239 72 C304 99 349 100 386 74" />
+              <path d="M104 50 C167 20 225 34 278 61 C323 84 364 87 393 67 C409 56 407 38 394 35 C380 31 370 42 374 53 C378 61 389 61 394 54" />
+            </svg>
+          </div>
+          <div class="rain-effect">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
         </div>
-      </article>
 
-      <article class="panel chart-panel">
-        <div class="panel-title"><div><span>Riwayat suhu</span><small>12 data terakhir</small></div><span class="live-label"><i></i> Live</span></div>
-        <div class="chart-wrap"><canvas id="temperatureChart" aria-label="Grafik riwayat suhu"></canvas></div>
-        <div class="chart-legend"><span><i></i>Suhu (°C)</span><strong id="chartRange">—</strong></div>
-      </article>
-    </section>
+        <article class="sensor-bubble rainfall-bubble" aria-label="Data sensor rainfall realtime">
+          <div class="bubble-title"><span class="sensor-live-dot"></span><div><small>SENSOR 01</small><strong>Rainfall</strong></div></div>
+          <div class="rainfall-reading"><strong id="stationRainfall">—</strong><span>mm</span></div>
+          <p id="rainfallStatus">Menunggu data hujan</p>
+        </article>
 
-    <section class="panel history-panel">
-      <div class="panel-title">
-        <div><span>Riwayat pembacaan</span><small>Data terbaru tersimpan di browser ini</small></div>
-        <strong id="historyCount">0 DATA</strong>
-      </div>
-      <div class="history-table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Waktu</th>
-              <th>Suhu</th>
-              <th>Kelembapan</th>
-              <th>Tekanan</th>
-              <th>Angin</th>
-              <th>Arah</th>
-              <th>Sinyal</th>
-            </tr>
-          </thead>
-          <tbody id="historyBody">
-            <tr class="empty-row"><td colspan="7">Belum ada data tersimpan</td></tr>
-          </tbody>
-        </table>
+        <article class="sensor-bubble weather-bubble" aria-label="Data sensor weather 5 in 1 realtime">
+          <div class="bubble-title"><span class="sensor-live-dot"></span><div><small>SENSOR 02</small><strong>Weather 5 in 1</strong></div></div>
+          <dl class="sensor-readings">
+            <div><dt>Suhu</dt><dd><span id="stationTemperature">—</span> °C</dd></div>
+            <div><dt>Kelembapan</dt><dd><span id="stationHumidity">—</span> %RH</dd></div>
+            <div><dt>Tekanan</dt><dd><span id="stationPressure">—</span> hPa</dd></div>
+            <div><dt>Angin</dt><dd><span id="stationWind">—</span> m/s</dd></div>
+            <div><dt>Arah</dt><dd id="stationDirection">—</dd></div>
+          </dl>
+        </article>
       </div>
     </section>
+
+    </div>
+
+    <div id="analyticsPage" class="app-page" hidden>
+      <section class="monitor-device-header">
+        <div>
+          <div class="monitor-name-row"><strong>DST0 Weather Station</strong><span id="analyticsConnectionBadge" class="monitor-status offline">Offline</span></div>
+          <span id="analyticsDeviceId" class="monitor-device-id">DST0X-001</span>
+        </div>
+        <button id="fullscreenAnalytics" class="icon-button fullscreen-button" type="button" title="Tampilkan layar penuh" aria-label="Tampilkan layar penuh"><span aria-hidden="true">⛶</span></button>
+      </section>
+
+      <section class="monitor-toolbar" aria-label="Filter analitik">
+        <div class="monitor-toolbar-main">
+        <div class="sensor-picker">
+          <button id="sensorPickerToggle" class="sensor-picker-toggle" type="button" aria-expanded="false" aria-controls="sensorPickerMenu">
+            <span id="sensorPickerLabel">Pilih Sensor</span><i aria-hidden="true"></i>
+          </button>
+          <div id="sensorPickerMenu" class="sensor-picker-menu" hidden>
+            <div class="sensor-picker-head">
+              <label><input id="selectAllSensors" type="checkbox" /><span>Pilih Semua</span></label>
+              <button id="closeSensorPicker" type="button" aria-label="Tutup pemilihan sensor">×</button>
+            </div>
+            <label class="sensor-search"><span class="sr-only">Cari sensor</span><input id="sensorSearch" type="search" placeholder="Cari parameter…" autocomplete="off" /></label>
+            <div id="sensorOptions" class="sensor-options">
+              <div class="sensor-option-row" data-search="suhu temperature"><label class="sensor-option-name"><input type="checkbox" name="sensorParameter" value="temperature" checked /><span>Suhu</span></label><select data-chart-parameter="temperature" aria-label="Tipe grafik Suhu"><option value="line">Line</option><option value="bar">Batang</option><option value="direction">Arah</option></select></div>
+              <div class="sensor-option-row" data-search="kelembapan humidity"><label class="sensor-option-name"><input type="checkbox" name="sensorParameter" value="humidity" /><span>Kelembapan</span></label><select data-chart-parameter="humidity" aria-label="Tipe grafik Kelembapan"><option value="line">Line</option><option value="bar">Batang</option><option value="direction">Arah</option></select></div>
+              <div class="sensor-option-row" data-search="tekanan pressure"><label class="sensor-option-name"><input type="checkbox" name="sensorParameter" value="pressure" /><span>Tekanan</span></label><select data-chart-parameter="pressure" aria-label="Tipe grafik Tekanan"><option value="line">Line</option><option value="bar">Batang</option><option value="direction">Arah</option></select></div>
+              <div class="sensor-option-row" data-search="kecepatan angin wind speed"><label class="sensor-option-name"><input type="checkbox" name="sensorParameter" value="wind" /><span>Kecepatan angin</span></label><select data-chart-parameter="wind" aria-label="Tipe grafik Kecepatan angin"><option value="line">Line</option><option value="bar">Batang</option><option value="direction">Arah</option></select></div>
+              <div class="sensor-option-row" data-search="arah angin wind direction"><label class="sensor-option-name"><input type="checkbox" name="sensorParameter" value="direction" /><span>Arah angin</span></label><select data-chart-parameter="direction" aria-label="Tipe grafik Arah angin"><option value="direction" selected>Arah</option><option value="line">Line</option><option value="bar">Batang</option></select></div>
+              <div class="sensor-option-row" data-search="rainfall hujan"><label class="sensor-option-name"><input type="checkbox" name="sensorParameter" value="rainfall" /><span>Rainfall</span></label><select data-chart-parameter="rainfall" aria-label="Tipe grafik Rainfall"><option value="bar" selected>Batang</option><option value="line">Line</option><option value="direction">Arah</option></select></div>
+              <div class="sensor-option-row" data-search="sinyal signal"><label class="sensor-option-name"><input type="checkbox" name="sensorParameter" value="signal" /><span>Sinyal</span></label><select data-chart-parameter="signal" aria-label="Tipe grafik Sinyal"><option value="line">Line</option><option value="bar">Batang</option><option value="direction">Arah</option></select></div>
+            </div>
+            <button id="applySensorSelection" class="apply-sensors" type="button">Terapkan</button>
+          </div>
+        </div>
+          <div class="monitor-filters">
+            <label class="compact-control"><span class="sr-only">Rata-rata per</span>
+              <select id="aggregationPeriod">
+                <option value="realtime">Realtime</option>
+                <option value="minute">Per menit</option>
+                <option value="hour">Per jam</option>
+                <option value="day">Per hari</option>
+                <option value="week">Per minggu</option>
+              </select>
+            </label>
+            <div class="date-range-control" aria-label="Rentang tanggal">
+              <label><span class="sr-only">Mulai tanggal</span><input id="rangeStart" type="date" /></label>
+              <span aria-hidden="true">→</span>
+              <label><span class="sr-only">Sampai tanggal</span><input id="rangeEnd" type="date" /></label>
+            </div>
+            <div class="result-control"><span>Semua</span><strong id="filteredCount">0</strong></div>
+            <button id="downloadExcel" class="icon-button" type="button" title="Unduh Excel" aria-label="Unduh Excel"><span aria-hidden="true">⇩</span></button>
+          </div>
+        </div>
+        <div class="selected-sensor-row">
+          <button class="settings-button" type="button" aria-label="Pengaturan grafik" disabled>⚙</button>
+          <div id="selectedSensorBadges" class="selected-sensor-badges"></div>
+        </div>
+      </section>
+
+      <section class="analytics-chart-panel">
+        <p id="chartSubtitle" class="sr-only">Rata-rata harian</p>
+        <div class="analytics-chart-wrap"><canvas id="analyticsChart" aria-label="Grafik data sensor terpilih"></canvas></div>
+        <div id="analyticsLegend" class="analytics-legend"></div>
+      </section>
+
+      <section class="panel history-panel">
+        <div class="panel-title">
+          <div><span>Data Pemantauan</span><small>Nilai berdasarkan filter aktif</small></div>
+          <strong id="historyCount">0 DATA</strong>
+        </div>
+        <div class="history-table-wrap">
+          <table id="analyticsTable">
+            <thead id="historyHead"></thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
 
     <footer>
       <span>Firmware <b id="firmwareVersion">—</b></span>
